@@ -2,10 +2,23 @@
 Test suite for the FastAPI boilerplate application.
 """
 
+import pytest
 from fastapi.testclient import TestClient
-from main import app
+from main import app, items_db, next_id
 
 client = TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def reset_database():
+    """Reset the database before each test."""
+    global items_db, next_id
+    items_db.clear()
+    next_id = 1
+    yield
+    # Clean up after test if needed
+    items_db.clear()
+    next_id = 1
 
 
 def test_root():

@@ -37,8 +37,9 @@ class ItemCreate(ItemBase):
 class Item(ItemBase):
     id: int
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }
 
 
 # In-memory storage for demonstration
@@ -77,7 +78,7 @@ async def get_item(item_id: int):
 async def create_item(item: ItemCreate):
     """Create a new item."""
     global next_id
-    new_item = Item(id=next_id, **item.dict())
+    new_item = Item(id=next_id, **item.model_dump())
     items_db.append(new_item)
     next_id += 1
     return new_item
@@ -88,7 +89,7 @@ async def update_item(item_id: int, item: ItemCreate):
     """Update an existing item."""
     for idx, existing_item in enumerate(items_db):
         if existing_item.id == item_id:
-            updated_item = Item(id=item_id, **item.dict())
+            updated_item = Item(id=item_id, **item.model_dump())
             items_db[idx] = updated_item
             return updated_item
     raise HTTPException(status_code=404, detail="Item not found")
