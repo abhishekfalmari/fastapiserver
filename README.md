@@ -1,6 +1,6 @@
-# FastAPI Server Boilerplate
+# FastAPI Server Boilerplate with PostgreSQL
 
-A production-ready FastAPI boilerplate application with essential features for quick development.
+A production-ready FastAPI boilerplate application with essential features for quick development, integrated with PostgreSQL database.
 
 ## Features
 
@@ -19,6 +19,7 @@ A production-ready FastAPI boilerplate application with essential features for q
 
 - Python 3.7+
 - pip
+- PostgreSQL database (running locally or accessible via connection string)
 
 ### Installation
 
@@ -39,12 +40,20 @@ A production-ready FastAPI boilerplate application with essential features for q
    pip install -r requirements.txt
    ```
 
+4. Set up PostgreSQL database:
+   - Ensure PostgreSQL is running (default: localhost:5432)
+   - Create a database named `fastapiserver` (or update DATABASE_URL in .env)
+   - Default credentials: username=postgres, password=postgres
+   - You can also set environment variable DATABASE_URL for custom connection
+   - The application will automatically create tables on first run
+
 ### Running the Application
 
 ```bash
 uvicorn main:app --reload
 ```
 
+On first run, the application will automatically create the necessary database tables.
 The API will be available at http://localhost:8000
 
 ### API Documentation

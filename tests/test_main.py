@@ -1,10 +1,16 @@
 """
-Test suite for the FastAPI boilerplate application.
+Test suite for the FastAPI boilerplate application with PostgreSQL.
 """
+import os
+# Set environment variable to use SQLite file-based database for testing
+# This must be done BEFORE importing ANYTHING that imports the app
+os.environ["DATABASE_URL"] = "sqlite:///./test.db"
 
 import pytest
 from fastapi.testclient import TestClient
-from main import app, items_db, next_id
+from main import app
+from database import SessionLocal, engine
+import models
 
 client = TestClient(app)
 
@@ -12,20 +18,24 @@ client = TestClient(app)
 @pytest.fixture(autouse=True)
 def reset_database():
     """Reset the database before each test."""
-    global items_db, next_id
-    items_db.clear()
-    next_id = 1
+    # Drop all tables and recreate them
+    models.Base.metadata.drop_all(bind=engine)
+    models.Base.metadata.create_all(bind=engine)
     yield
-    # Clean up after test if needed
-    items_db.clear()
-    next_id = 1
+    # Clean up after test
+    models.Base.metadata.drop_all(bind=engine)
 
 
 def test_root():
     """Test the root endpoint."""
     response = client.get("/")
     assert response.status_code == 200
-    assert response.json() == {"message": "Welcome to the FastAPI Boilerplate API", "docs": "/docs"}
+    data = response.json()
+    assert data["message"] == "Welcome to the FastAPI Boilerplate API"
+    assert "documentation" in data
+    assert data["documentation"]["swagger_ui"] == "/docs"
+    assert data["documentation"]["redoc"] == "/redoc"
+    assert data["version"] == "0.1.0"
 
 
 def test_health():
@@ -48,6 +58,7 @@ def test_create_item():
     assert data["price"] == 10.0
     assert data["tax"] == 1.0
     assert "id" in data
+    assert isinstance(data["id"], int)
 
 
 def test_get_items():
